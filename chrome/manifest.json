@@ -4,7 +4,7 @@
     "short_name": "FPS",
     "description": "__MSG_chrome_extension_description__",
     "default_locale": "en",
-    "version": "1.1.9",
+    "version": "1.1.10",
     "icons": {
         "16": "icon16.png",
         "48": "icon48.png",
@@ -12,7 +12,6 @@
     },
     "permissions": [
         "https://*.facebook.com/*",
-        "https://*.googledrive.com/*",
         "tabs",
         "activeTab"
     ],
@@ -20,7 +19,7 @@
         "scripts": ["background.js"],
         "persistent": true
     },
-    "content_security_policy": "script-src 'self' https://www.google-analytics.com; media-src 'https://*.googledrive.com'; object-src 'self';",
+    "content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self';",
     "content_scripts": [{
         "matches": ["https://*.facebook.com/*"],
         "js": ["analytics.js", "main.js"],
