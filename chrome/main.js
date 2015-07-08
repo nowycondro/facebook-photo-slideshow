@@ -16,7 +16,8 @@ _FPS.config = {
     scrollTopPosition: 350,
     numberOfLeaves: 30,
     // assetsLink: "https://www.googledrive.com/host/0B92bfhwVuwZufjN3Si1KQ2NySVpTa0J2b1NxNm10bzg0ZTAtb0tyWDRVYUxMQk1JeEdWN00/assets/fps/",
-    assetsLink: "https://dl.dropboxusercontent.com/u/11065495/assets/fps/",
+    // assetsLink: "https://dl.dropboxusercontent.com/u/11065495/assets/fps/",
+    assetsLink: "https://raw.githubusercontent.com/nowycheung/facebook-photo-slideshow/master/assets/",
     leavesSize: {
         w: 48,
         h: 48
@@ -634,16 +635,18 @@ _FPS.createPlayButton = function() {
 
             _FPS.data.audio.pause();
 
-            var trackNumber = _FPS.utils.randomFromTo(1, _FPS.config.totalBackgroundMusic);
-            // _FPS.data.audio.src = _FPS.config.assetsLink + 'bg_music' + _FPS.utils.randomFromTo(1, _FPS.config.totalBackgroundMusic) + '.mp3';
-            if (_FPS.data.music_cache[trackNumber]) {
-                _FPS.data.audio.src = _FPS.data.music_cache[trackNumber];
-            }else {
-                _FPS.XMLHttpRequestBlob(_FPS.config.assetsLink + 'bg_music' + trackNumber + '.mp3', function(data) {
-                    _FPS.data.music_cache[trackNumber] = data;
-                    _FPS.data.audio.src = data;
-                });
-            }
+
+            _FPS.data.audio.src = _FPS.config.assetsLink + 'bg_music' + _FPS.utils.randomFromTo(1, _FPS.config.totalBackgroundMusic) + '.mp3';
+
+            // var trackNumber = _FPS.utils.randomFromTo(1, _FPS.config.totalBackgroundMusic);            
+            // if (_FPS.data.music_cache[trackNumber]) {
+            //     _FPS.data.audio.src = _FPS.data.music_cache[trackNumber];
+            // }else {
+            //     _FPS.XMLHttpRequestBlob(_FPS.config.assetsLink + 'bg_music' + trackNumber + '.mp3', function(data) {
+            //         _FPS.data.music_cache[trackNumber] = data;
+            //         _FPS.data.audio.src = data;
+            //     });
+            // }
             
             _FPS.data.fpsGalleryWrapper.style.display = "none";
             _FPS.data.fpsOverlay.style.display = "none";
