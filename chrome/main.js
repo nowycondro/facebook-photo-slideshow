@@ -56,16 +56,14 @@ _FPS.utils = {
             result = [],
             currentNode,
             i,
-            link;
+            link,
+            attribute;
 
         for (i = 0; i < imageList.length; i++) {
-            currentNode = imageList[i];
-            if (currentNode.clientHeight > 0 && currentNode.clientWidth > 0) {
-                link = _FPS.utils.getParameter('src', currentNode.href);
-                link = window.decodeURIComponent(link).trim();
-                if (link) {
-                    result.push(link);
-                }
+            currentNode = imageList[i].parentNode;
+            attribute = currentNode.attributes["data-starred-src"];
+            if (attribute && attribute.value) {
+                result.push(attribute.value);
             }
         }
         return result;
@@ -521,6 +519,7 @@ _FPS.dectector = function(mutations) {
         pageletDockWrapper = document.querySelector("body #pagelet_dock .fbDockWrapper");
 
     if (photoGalleryNode) {
+        console.log("photoGalleryNode", photoGalleryNode);
         urlList = _FPS.utils.getUrl(photoGalleryNode);
 
         // If random
