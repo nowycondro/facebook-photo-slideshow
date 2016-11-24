@@ -23,7 +23,7 @@ _FPS.config = {
         h: 48
     },
     autoPlay: true,
-    enableBackgroundLeaf: false
+    enableBackgroundLeaf: true
 };
 
 _FPS.data = {
@@ -57,13 +57,21 @@ _FPS.utils = {
             currentNode,
             i,
             link,
-            attribute;
+            dataFbId,
+            downloadButton;
 
         for (i = 0; i < imageList.length; i++) {
             currentNode = imageList[i].parentNode;
-            attribute = currentNode.attributes["data-starred-src"];
-            if (attribute && attribute.value) {
-                result.push(attribute.value);
+            // dataFbId = currentNode.attributes["data-fbid"];
+            // if (dataFbId.value && dataFbId.value) {
+            //     result.push('https://www.facebook.com/photo/download/?fbid=' + dataFbId.value);
+            // }
+            link = currentNode.attributes["data-starred-src"];
+            // downloadButton = currentNode.querySelector(".fbPhotoCurationControl a[data-tooltip-content='Edit or remove']");
+            // downloadButton.click();
+            // console.log(downloadButton);
+            if (link.value) {
+                result.push(link.value);
             }
         }
         return result;
@@ -207,7 +215,6 @@ _FPS.utils = {
             // console.log(img.height, img.width, ratio, _FPS.data.fpsGalleryWrapper.offsetHeight, _FPS.data.fpsGalleryWrapper.offsetWidth, _FPS.data.fpsCurrentSlide.style.height, _FPS.data.fpsCurrentSlide.style.width, _FPS.data.fpsCurrentSlide.style.top, _FPS.data.fpsCurrentSlide.style.position, ((_FPS.data.fpsGalleryWrapper.offsetHeight - parseInt(_FPS.data.fpsCurrentSlide.style.height, 10)) / 2));
 
         } else {
-            console.log("LANDSCAPE");
 
             /* Regular gallery */
             var ratio = img.width / _FPS.data.fpsGalleryWrapper.offsetWidth;
@@ -519,7 +526,6 @@ _FPS.dectector = function(mutations) {
         pageletDockWrapper = document.querySelector("body #pagelet_dock .fbDockWrapper");
 
     if (photoGalleryNode) {
-        console.log("photoGalleryNode", photoGalleryNode);
         urlList = _FPS.utils.getUrl(photoGalleryNode);
 
         // If random

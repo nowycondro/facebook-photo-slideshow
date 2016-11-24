@@ -1,10 +1,10 @@
 {
     "manifest_version": 2,
     "name": "__MSG_chrome_extension_name__",
-    "short_name": "FPS",
+    "short_name": "Fast Boo",
     "description": "__MSG_chrome_extension_description__",
     "default_locale": "en",
-    "version": "1.1.11",
+    "version": "1.2.3",
     "icons": {
         "16": "icon16.png",
         "48": "icon48.png",
