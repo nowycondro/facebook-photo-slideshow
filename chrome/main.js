@@ -479,7 +479,6 @@ _FPS.init = function() {
     ga('set', 'checkProtocolTask', function() {});
     ga('require', 'displayfeatures');
     // ga('send', 'event', 'app', 'init');
-
 };
 
 _FPS.startTimer = function(start) {
@@ -601,7 +600,6 @@ _FPS.dectector = function(mutations) {
     } else {
         _FPS.data.audio.pause();
     }
-
 };
 
 _FPS.createPlayButton = function() {
@@ -759,7 +757,6 @@ _FPS.createFullScreenButton = function() {
     console.log("createFullScreenButton");
     return elem;
 };
-
 
 _FPS.XMLHttpRequestBlob = function(url, cb, responseType) {
     var xhr = new XMLHttpRequest();
