@@ -4,7 +4,7 @@
     "short_name": "Fast Boo",
     "description": "__MSG_chrome_extension_description__",
     "default_locale": "en",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "icons": {
         "16": "icon16.png",
         "48": "icon48.png",
@@ -22,7 +22,7 @@
     "content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self';",
     "content_scripts": [{
         "matches": ["https://*.facebook.com/*"],
-        "js": ["analytics.js", "main.js"],
+        "js": ["analytics.js", "utils.js", "plugins.js", "index.js"],
         "css": ["style.css"],
         "run_at": "document_end"
     }],
