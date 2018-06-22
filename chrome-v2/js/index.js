@@ -2,91 +2,136 @@
 const PHOTO_PATH = ['/photos', '/photos/', '/photos_all', 'photos_of', '/media_set']
 const PLAY_BTN_ID = 'slider-play-btn'
 
-let imageUrl = []
+const CACHE = {}
 
-const isPhotoPage = () => !!PHOTO_PATH.find(path => {
-  const pathname = document.location.pathname
-  const index = pathname.lastIndexOf(path)
-  if (index < 0) { return false }
+const getQuery = (search) => search
+  .substring(1)
+  .split('&')
+  .map(item => item.split('='))
+  .reduce((prev, [key, value]) => ({
+    ...prev,
+    [key]: value
+  }), {})
 
-  return index === (pathname.length - path.length)
-})
+const isLegacyProfile = (query, pathname) => pathname === '/profile.php' && query.sk === 'photos'
+const isPhotoPage = (query, pathname) => isLegacyProfile(query, pathname) || !!PHOTO_PATH.find(path => pathname.endsWith(path))
+const isMediaSetPage = () => document.location.pathname.endsWith('/media_set')
 
-const isMediaSetPage = () => {
-  const mediaSet = '/media_set'
-  const pathname = document.location.pathname
-  const index = pathname.lastIndexOf(mediaSet)
-  if (index < 0) { return false }
-
-  return index === (pathname.length - mediaSet.length)
-}
-
-const createPlayButton = () => {
+const createPlayButton = (cacheKey) => {
   const playBtn = document.querySelector(`#${PLAY_BTN_ID}`)
+
   if (playBtn) {
-    if (isPhotoPage()) {
+    const set = CACHE[cacheKey]
+
+    if (set && set.size > 0) {
       playBtn.classList.add('is-photo-page')
     } else {
       playBtn.classList.remove('is-photo-page')
     }
-  } else {
-    const elem = document.createElement('div')
 
-    elem.id = PLAY_BTN_ID
-    elem.textContent = 'Play'
-
-    elem.addEventListener('click', () => {
-      if (imageUrl.length > 0) {
-        const optionsPage = LZString.compressToEncodedURIComponent(imageUrl.join(','))
-        chrome.runtime.sendMessage({optionsPage})
-        ga('send', 'event', {
-          'eventCategory': 'play-btn',
-          'eventAction': 'play',
-          'eventLabel': imageUrl.length
-        })
-      }
-    }, false)
-
-    document.body.appendChild(elem)
+    return
   }
+
+  const elem = document.createElement('div')
+
+  elem.id = PLAY_BTN_ID
+  elem.textContent = 'Play'
+
+  elem.addEventListener('click', () => {
+    const cacheKey = createKeys(document.location)
+    const set = CACHE[cacheKey]
+    const photoCount = set && set.size
+
+    if (!photoCount) {
+      return
+    }
+
+    const optionsPage = LZString.compressToEncodedURIComponent(Array.from(set).join(','))
+    chrome.runtime.sendMessage({optionsPage})
+    ga('send', 'event', {
+      'eventCategory': 'play-btn',
+      'eventAction': 'play',
+      'eventLabel': photoCount
+    })
+  }, false)
+
+  document.body.appendChild(elem)
 }
 
 const getUrlFromAttribute = () => {
   // const selector = 'a.uiMediaThumb:not([class~="albumThumbLink"])'
   const selector = '#pagelet_timeline_medley_photos div:not([class~="hidden_elem"]) > ul > li.fbPhotoStarGridElement'
   const nodeList = document.querySelectorAll(selector)
-  return Array.from(nodeList)
-    .map(node => encodeURIComponent(node.attributes['data-starred-src'].value))
+  const encode = (attributes) => encodeURIComponent(attributes['data-starred-src'].value)
+
+  return Array.from(nodeList).map(({attributes}) => encode(attributes))
 }
 
-chrome.runtime.onMessage.addListener((data) => {
-  if (data.imageUrl && isPhotoPage()) {
-    if (isMediaSetPage()) {
-      imageUrl.push(encodeURIComponent(data.imageUrl))
+const createKeys = ({pathname, search}) => {
+  const query = getQuery(search)
+  if (!isPhotoPage(query, pathname)) {
+    return null
+  }
+
+  const {id = '', photos = '', collection_token = ''} = query
+  const set = query.set || ''
+  const path = pathname.replace('photos_of', 'photos')
+
+  return `${path}-${id}-${photos}-${collection_token}-${set}`/* eslint camelcase: 0 */
+}
+
+const handleImage = (imageUrl, cacheKey) => {
+  if (!imageUrl || !cacheKey) { return }
+
+  CACHE[cacheKey] = CACHE[cacheKey] || new Set()
+
+  const set = CACHE[cacheKey]
+
+  if (isMediaSetPage()) {
+    set.add(encodeURIComponent(imageUrl))
+  } else {
+    const urlFromAttribute = getUrlFromAttribute()
+    if (urlFromAttribute.length > 0) {
+      CACHE[cacheKey] = new Set(urlFromAttribute)
     } else {
-      const urlFromAttribute = getUrlFromAttribute()
-      if (urlFromAttribute.length > 0) {
-        imageUrl = urlFromAttribute
-      } else {
-        imageUrl.push(encodeURIComponent(data.imageUrl))
-      }
+      set.add(encodeURIComponent(imageUrl))
     }
   }
+}
 
-  if (data.changeInfo && data.changeInfo.status === 'complete') {
-    if (!isPhotoPage()) {
-      imageUrl = []
-    }
-    createPlayButton()
-  }
-
-  const badgeText = imageUrl.length > 0 ? imageUrl.length.toString() : ''
-
-  if (data.updateBadgeTextRequest) {
-    chrome.runtime.sendMessage({badgeText})
-  }
+const updateBadgeText = (cacheKey) => {
+  const set = CACHE[cacheKey]
+  const photoCount = set ? set.size : 0
+  const badgeText = photoCount > 0 ? `${photoCount}` : ''
 
   chrome.runtime.sendMessage({badgeText})
+}
+
+const handleChangeInfo = (changeInfo, cacheKey) => {
+  if (!changeInfo || !cacheKey) { return }
+
+  if (changeInfo.status === 'complete') {
+    updateBadgeText(cacheKey)
+  }
+}
+
+const handleBadgeText = (updateBadgeTextRequest, cacheKey) => {
+  if (updateBadgeTextRequest) {
+    updateBadgeText(cacheKey)
+  }
+}
+chrome.runtime.onMessage.addListener((data) => {
+  const cacheKey = createKeys(document.location)
+
+  handleImage(data.imageUrl, cacheKey)
+
+  handleChangeInfo(data.changeInfo, cacheKey)
+
+  createPlayButton(cacheKey)
+
+  handleBadgeText(data.updateBadgeTextRequest, cacheKey)
+
+  updateBadgeText(cacheKey)
 })
 
 chrome.runtime.sendMessage({ready: true}, (data) => {
