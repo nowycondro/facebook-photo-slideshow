@@ -1,0 +1,29 @@
+{
+  "name": "facebook-photo-slideshow",
+  "version": "2.0.2",
+  "description": "Fast Boo (aka Facebook) Photo Slide Show",
+  "main": "index.js",
+  "scripts": {
+    "release": "npm version minor",
+    "build": "node ./bin/build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nowycheung/facebook-photo-slideshow.git"
+  },
+  "keywords": [
+    "chrome",
+    "firefox",
+    "facebook",
+    "extension"
+  ],
+  "author": "Nowy Condro",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nowycheung/facebook-photo-slideshow/issues"
+  },
+  "homepage": "https://github.com/nowycheung/facebook-photo-slideshow#readme",
+  "devDependencies": {
+    "fs-extra": "^6.0.1"
+  }
+}

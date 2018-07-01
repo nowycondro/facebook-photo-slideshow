@@ -10,4 +10,5 @@ Thumbs.db
 
 
 *.zip
-*.backup
+node_modules
+build

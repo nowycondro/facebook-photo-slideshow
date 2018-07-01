@@ -1,0 +1,65 @@
+html, body {
+  position: relative;
+  height: 100%;
+}
+body {
+  background: #000;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+  color: gray;
+  margin: 0;
+  padding: 0;
+}
+
+.swiper-pagination-bullet {
+  background: #fff;
+}
+
+.how-to {
+  padding: 10%;
+  color: white;
+  font-size: 20px;
+}
+.center {
+  text-align: center;
+}
+
+a:link,
+a:visited,
+a:hover,
+a:active {
+  text-decoration-color: gray;
+  color: gray;
+}
+
+.hide {
+  opacity: 0!important;
+  height: 1px!important;
+}
+
+#slidershow {
+  padding-top: 10%;
+  text-align: center;
+  opacity: 1;
+  transition: opacity 1s;
+}
+
+#mosaic {
+  position: absolute;
+  opacity: 1;
+  transition: opacity 1s;
+  top: 0;
+}
+
+#viewSwitch::after {
+  content: '👀';
+  position: fixed;
+  bottom: -8px;
+  left: 4px;
+  font-size: 40px;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+img {
+  transition: width,height 500ms;
+}
