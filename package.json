@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "release": "npm version minor",
-    "build": "node ./bin/build"
+    "build": "node ./bin/build",
+    "pretty": "standard --fix",
+    "start-ff": "web-ext run --source-dir ./build/firefox/"
   },
   "repository": {
     "type": "git",
@@ -24,6 +26,13 @@
   },
   "homepage": "https://github.com/nowycheung/facebook-photo-slideshow#readme",
   "devDependencies": {
-    "fs-extra": "^6.0.1"
+    "fs-extra": "^6.0.1",
+    "web-ext": "^2.7.0",
+    "zip-folder": "^1.0.0"
+  },
+  "standard": {
+    "ignore": [
+      "src/js/analytics.js"
+    ]
   }
 }

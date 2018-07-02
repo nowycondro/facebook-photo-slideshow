@@ -1,0 +1,10 @@
+{
+    "flow.pathToFlow": false,
+    "javascript.validate.enable": false,
+    "flow.useNPMPackagedFlow": false,
+    "window.zoomLevel": 0,
+    "standard.autoFixOnSave": true,
+    "standard.run": "onSave",
+    "standard.usePackageJson": true,
+    "eslint.enable": false,
+}
