@@ -1,4 +1,4 @@
-/* global chrome, ga, LZString */
+/* global chrome, LZString */
 const PHOTO_PATH = ['/photos', '/photos/', '/photos_all', 'photos_of', '/media_set']
 const PLAY_BTN_ID = 'slider-play-btn'
 
@@ -50,11 +50,11 @@ const createPlayButton = (cacheKey) => {
 
     chrome.runtime.sendMessage({optionsPage})
 
-    ga('send', 'event', {
-      'eventCategory': 'play-btn',
-      'eventAction': 'play',
-      'eventLabel': photoCount
-    })
+    // fpsAnalytics({
+    //   'eventCategory': 'play-btn',
+    //   'eventAction': 'play',
+    //   'eventLabel': photoCount
+    // })
   }, false)
 
   document.body.appendChild(elem)
@@ -138,9 +138,11 @@ chrome.runtime.onMessage.addListener((data) => {
 
 chrome.runtime.sendMessage({ready: true}, (data) => {
   if (data.ready) {
-    ga('create', 'UA-22076179-7', 'auto')
-    ga('set', 'checkProtocolTask', () => {})
-    ga('require', 'displayfeatures')
+    // fpsAnalytics({
+    //   'eventCategory': 'init',
+    //   'eventAction': 'ready',
+    //   'eventLabel': data.ready
+    // })
   }
 })
 

@@ -40,9 +40,9 @@
       return new Promise((resolve, reject) => {
         const next = (error, url) => {
           loadCount++
-          root.innerHTML = `Loading ${loadCount} of ${urls.length} image(s)`
+          $('#slidershow').html(`Loading ${loadCount} of ${urls.length} image(s)`)
           if (error) {
-            root.innerHTML = `Invalid URL ${url}`
+            $('#slidershow').html(`Invalid URL ${url}`)
             resolve()
           } else {
             resolve(url)
@@ -101,6 +101,10 @@
     $('#viewSwitch').click(() => {
       root.classList.toggle('hide')
       mosaicRoot.classList.toggle('hide')
+
+      if (!mosaicRoot.classList.contains('hide')) {
+        initMosaic()
+      }
     })
   }
 
@@ -117,7 +121,7 @@
 
   if (imageSrc) {
     const sources = imageSrc.split(',')
-    root.innerHTML = `Loading ${sources.length} image(s) ...`
+    $('#slidershow').html(`Loading ${sources.length} image(s) ...`)
     fetchImages(sources)
       .then(urls => urls.filter(url => url))
       .then((urls) => {
@@ -127,12 +131,12 @@
         }
       })
       .then(container => {
-        root.innerHTML = container.swiper
-        mosaicRoot.innerHTML = container.mosaic
+        $('#slidershow').html(container.swiper)
+        $('#mosaic').html(container.mosaic)
       })
       .then(initSwiper)
-      .then(initMosaic)
       .then(playMusic)
       .then(initViewSwitcher)
+      .then(initMosaic)
   }
 })()

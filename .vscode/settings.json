@@ -1,10 +1,13 @@
 {
-    "flow.pathToFlow": false,
     "javascript.validate.enable": false,
-    "flow.useNPMPackagedFlow": false,
-    "window.zoomLevel": 0,
+    "flow.enabled": false,
+    "standard.run": "onType",
     "standard.autoFixOnSave": true,
-    "standard.run": "onSave",
-    "standard.usePackageJson": true,
-    "eslint.enable": false,
+    "eslint.enable": true,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "workbench.activityBar.visible": true,
+    "editor.minimap.enabled": false,
+    "window.zoomLevel": 1
 }
