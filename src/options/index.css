@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   position: relative;
   height: 100%;
 }
@@ -32,15 +33,15 @@ a:active {
 }
 
 .hide {
-  opacity: 0!important;
-  height: 1px!important;
+  opacity: 0 !important;
+  height: 1px !important;
 }
 
 #slidershow {
-  padding-top: 10%;
   text-align: center;
   opacity: 1;
   transition: opacity 1s;
+  max-height: 100vh;
 }
 
 #mosaic {
@@ -51,7 +52,7 @@ a:active {
 }
 
 #viewSwitch::after {
-  content: '👀';
+  content: "👀";
   position: fixed;
   bottom: -8px;
   left: 4px;
@@ -61,5 +62,13 @@ a:active {
 }
 
 img {
-  transition: width,height 500ms;
+  transition: width, height 500ms;
+}
+
+.swiper-lazy {
+  max-height: 100vh !important;
+}
+
+.swiper-button-hidden {
+  display: none;
 }

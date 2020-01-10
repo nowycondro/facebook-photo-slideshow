@@ -16,14 +16,13 @@ chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
 
   if (typeof data.optionsPage === 'string') {
     const optionsURL = chrome.runtime.getURL('options/index.html')
-    chrome.windows.create({url: `${optionsURL}?LZSsrc=${data.optionsPage}`})
+    chrome.windows.create({url: `${optionsURL}?LZSsrc=${data.optionsPage}`, state: 'fullscreen'})
   }
 })
 
 chrome.webRequest.onCompleted.addListener((details) => {
   const imageUrl = details.url
   const isImageUrl = imageUrl.indexOf('https://scontent-') === 0 && imageUrl.indexOf('/v/t1.0-0') > 0
-
   if (isImageUrl) {
     chrome.tabs.sendMessage(details.tabId, {imageUrl})
   }
