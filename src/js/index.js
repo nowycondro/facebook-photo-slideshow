@@ -1,4 +1,4 @@
-/* global chrome, ga, LZString */
+/* global chrome, LZString */
 const PHOTO_PATH = ['/photos', '/photos/', '/photos_all', 'photos_of', '/media_set']
 const PLAY_BTN_ID = 'slider-play-btn'
 
@@ -29,7 +29,7 @@ const createPlayButton = (cacheKey) => {
       playBtn.classList.remove('is-photo-page')
     }
 
-    return
+    return playBtn
   }
 
   const elem = document.createElement('div')
@@ -38,26 +38,38 @@ const createPlayButton = (cacheKey) => {
   elem.textContent = 'Play'
 
   elem.addEventListener('click', () => {
-    const cacheKey = createKeys(document.location)
-    const set = CACHE[cacheKey]
-    const photoCount = set && set.size
+    const ajaxifySelector = "a.uiMediaThumb";
+    const ajaxifyLink = [...document.querySelectorAll(ajaxifySelector)].map(a => a.getAttributeNode("ajaxify").value).filter(link => !!link);
 
-    if (!photoCount) {
-      return
+    if (ajaxifyLink.length > 0) {
+      const optionsPage = LZString.compressToEncodedURIComponent(ajaxifyLink.join('___'))
+      chrome.runtime.sendMessage({optionsPage})
     }
 
-    const optionsPage = LZString.compressToEncodedURIComponent(Array.from(set).join(','))
 
-    chrome.runtime.sendMessage({optionsPage})
+    // Note: Legacy way to get images
 
-    ga('send', 'event', {
-      'eventCategory': 'play-btn',
-      'eventAction': 'play',
-      'eventLabel': photoCount
-    })
+    // const cacheKey = createKeys(document.location)
+    // const set = CACHE[cacheKey]
+    // const photoCount = set && set.size
+
+    // if (!photoCount) {
+    //   return
+    // }
+
+    // const optionsPage = LZString.compressToEncodedURIComponent(Array.from(set).join(','))
+    // chrome.runtime.sendMessage({optionsPage})
+
+    // fpsAnalytics({
+    //   'eventCategory': 'play-btn',
+    //   'eventAction': 'play',
+    //   'eventLabel': photoCount
+    // })
   }, false)
 
   document.body.appendChild(elem)
+
+  return elem
 }
 
 const getUrlFromAttribute = () => {
@@ -101,46 +113,56 @@ const handleImage = (imageUrl, cacheKey) => {
   }
 }
 
-const updateBadgeText = (cacheKey) => {
+const updateBadgeText = (cacheKey, playBtn) => {
   const set = CACHE[cacheKey]
   const photoCount = set ? set.size : 0
   const badgeText = photoCount > 0 ? `${photoCount}` : ''
 
+  if (playBtn) {
+    if (photoCount > 0) {
+      playBtn.textContent = `Play ${photoCount}`
+    } else {
+      playBtn.textContent = 'Play'
+    }
+  }
+
   chrome.runtime.sendMessage({badgeText})
 }
 
-const handleChangeInfo = (changeInfo, cacheKey) => {
+const handleChangeInfo = (changeInfo, cacheKey, playBtn) => {
   if (!changeInfo || !cacheKey) { return }
 
   if (changeInfo.status === 'complete') {
-    updateBadgeText(cacheKey)
+    updateBadgeText(cacheKey, playBtn)
   }
 }
 
-const handleBadgeText = (updateBadgeTextRequest, cacheKey) => {
+const handleBadgeText = (updateBadgeTextRequest, cacheKey, playBtn) => {
   if (updateBadgeTextRequest) {
-    updateBadgeText(cacheKey)
+    updateBadgeText(cacheKey, playBtn)
   }
 }
+
 chrome.runtime.onMessage.addListener((data) => {
   const cacheKey = createKeys(document.location)
+  const playBtn = createPlayButton(cacheKey)
 
   handleImage(data.imageUrl, cacheKey)
 
-  handleChangeInfo(data.changeInfo, cacheKey)
+  handleChangeInfo(data.changeInfo, cacheKey, playBtn)
 
-  createPlayButton(cacheKey)
+  handleBadgeText(data.updateBadgeTextRequest, cacheKey, playBtn)
 
-  handleBadgeText(data.updateBadgeTextRequest, cacheKey)
-
-  updateBadgeText(cacheKey)
+  updateBadgeText(cacheKey, playBtn)
 })
 
 chrome.runtime.sendMessage({ready: true}, (data) => {
   if (data.ready) {
-    ga('create', 'UA-22076179-7', 'auto')
-    ga('set', 'checkProtocolTask', () => {})
-    ga('require', 'displayfeatures')
+    // fpsAnalytics({
+    //   'eventCategory': 'init',
+    //   'eventAction': 'ready',
+    //   'eventLabel': data.ready
+    // })
   }
 })
 

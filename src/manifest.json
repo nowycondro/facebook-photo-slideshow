@@ -4,7 +4,7 @@
     "short_name": "Fast Boo",
     "description": "__MSG_chrome_extension_description__",
     "default_locale": "en",
-    "version": "2.0.2",
+    "version": "2.0.8",
     "icons": {
         "16": "img/icon16.png",
         "48": "img/icon48.png",
@@ -29,7 +29,6 @@
         ],
         "persistent": true
     },
-    "content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self';",
     "content_scripts": [
         {
             "matches": [
