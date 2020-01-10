@@ -83,7 +83,6 @@
 
   const initSwiper = () => new Swiper('.swiper-container', {
     speed: 1300,
-    autoHeight: true,
     keyboard: {
       enabled: true
     },
