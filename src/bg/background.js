@@ -1,7 +1,7 @@
 /* global chrome */
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (tab.status === 'complete') {
-    chrome.tabs.sendMessage(tabId, {changeInfo})
+    chrome.tabs.sendMessage(tabId, {changeInfo, tabUrl: tab.url})
   }
 })
 
@@ -20,23 +20,19 @@ chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
   }
 })
 
-chrome.webRequest.onCompleted.addListener((details) => {
-  const imageUrl = details.url
-  const isImageUrl = imageUrl.indexOf('https://scontent-') === 0 && imageUrl.indexOf('/v/t1.0-0') > 0
-  if (isImageUrl) {
-    chrome.tabs.sendMessage(details.tabId, {imageUrl})
-  }
-}, {urls: ['https://*.fbcdn.net/*']})
-
 chrome.tabs.onActivated.addListener(({tabId, windowId} = {}) => {
   chrome.tabs.query({windowId, 'active': true, 'lastFocusedWindow': true}, ([tab]) => {
     const isFBtab = tab.url.indexOf('https://www.facebook.com') === 0
+
     if (isFBtab) {
       chrome.tabs.sendMessage(tabId, {updateBadgeTextRequest: true})
       chrome.browserAction.setIcon({path: 'img/icon24.png'})
     } else {
       chrome.browserAction.setIcon({path: 'img/icon24-gray.png'})
-      chrome.browserAction.setBadgeText({text: ''})
     }
   })
 })
+
+chrome.webRequest.onCompleted.addListener((details) => {
+  chrome.tabs.sendMessage(details.tabId, {pageCompleted: true, tabUrl: 'https://www.facebook.com'})
+}, {urls: ['https://*.facebook.com/*']})

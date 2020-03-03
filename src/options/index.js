@@ -1,9 +1,7 @@
 /* global Swiper, Image, $, LZString */
 (() => {
   const ASSETS_LINK = 'https://raw.githubusercontent.com/nowycondro/facebook-photo-slideshow/master/assets/'
-  const generateMosaicImage = (images) => images.map(({url, width, height}) => {
-    return `<img src="${url}" width="${width}" height="${height}"/>`;
-  }).join('')
+  const generateMosaicImage = (images) => images.map(({url, width, height}) => `<img src="${url}" width="${width}" height="${height}"/>`).join('')
   const randomFromTo = (from, to) => Math.floor(Math.random() * (to - from + 1) + from)
   const generateSlide = (image) => `
     <div class="swiper-slide">
@@ -36,6 +34,27 @@
 
   const imageSrc = urlParams.src || urlParams.LZSsrc
 
+  const decodeImageUrl = (bodyText) => {
+    bodyText = bodyText.slice(bodyText.indexOf("scaledImageFitWidth img\" src=\"") + 30);
+    bodyText = bodyText.slice(0, bodyText.indexOf('"'));
+    bodyText = bodyText.split("&amp;").join("&");
+    return bodyText;
+  }
+
+  const getImageUrl = (bodyText) => {
+    let hyperfeedStoryId = bodyText.slice(bodyText.indexOf('<script>bigPipe.beforePageletArrive("hyperfeed_story_id_') + 37);
+    hyperfeedStoryId = hyperfeedStoryId.slice(0, hyperfeedStoryId.indexOf('")</script>'));
+
+    const selector = `{${hyperfeedStoryId}:{container_id:"`;
+    let containerID = bodyText.slice(bodyText.indexOf(selector) + selector.length);
+    containerID = containerID.slice(0, containerID.indexOf(`"}}`));
+
+    let imageContainer = bodyText.slice(bodyText.indexOf(`<code id="${containerID}"><!--`));
+    imageContainer = imageContainer.slice(0, imageContainer.indexOf(`--></code>`));
+
+    return decodeImageUrl(imageContainer);
+  }
+
   const getImageDimension = (url) => {
     return new Promise((resolve) => {
       const img = new Image()
@@ -46,21 +65,25 @@
   }
 
   const fetchImage = (url) => {
-    return fetch(url).then(res => res.text()).then(result => {
-      result = result.slice(result.indexOf("scaledImageFitWidth img\" src=\"") + 30);
-      result = result.slice(0, result.indexOf('"'));
-      result = result.split("&amp;").join("&");
-      return result;
-    }).then(imgUrl => getImageDimension(imgUrl));
+    return fetch(url)
+      .then(res => res.text())
+      .then(bodyText => getImageUrl(bodyText))
+      .then(imgUrl => getImageDimension(imgUrl));
+  }
+
+  const cleanUrls = (urls) => {
+    return [...new Set(urls.map(src => src.slice(0, src.indexOf("&set"))).filter(src => !!src))];
   }
 
   const fetchImages = (urls) => {
     let loadCount = 0
-    const promises = urls.map(url => {
+    const cleanedUrl = cleanUrls(urls)
+
+    const promises = cleanedUrl.map(url => {
       return new Promise((resolve) => {
         const next = (error, images) => {
           loadCount++
-          $('#slidershow').html(`Loading ${loadCount} of ${urls.length} image(s)`)
+          $('#slidershow').html(`Loading ${loadCount} of ${cleanedUrl.length} image(s)`)
           if (error) {
             $('#slidershow').html(`Invalid URL ${url}`)
             resolve()
