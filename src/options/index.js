@@ -1,29 +1,7 @@
 /* global Swiper, Image, $, LZString */
 (() => {
   const ASSETS_LINK = 'https://raw.githubusercontent.com/nowycondro/facebook-photo-slideshow/master/assets/'
-  const generateMosaicImage = (images) => images.map(({url, width, height}) => `<img src="${url}" width="${width}" height="${height}"/>`).join('')
   const randomFromTo = (from, to) => Math.floor(Math.random() * (to - from + 1) + from)
-  const generateSlide = (image) => `
-    <div class="swiper-slide">
-      <div class="swiper-zoom-container">
-        <img src="${image.url}" class="swiper-lazy">
-      </div>
-    </div>
-  `
-  const generateSwiperContainer = (slides) => `
-    <div class="swiper-container">
-      <div class="swiper-wrapper">
-        ${slides.join('')}
-      </div>
-      <div class="swiper-pagination swiper-pagination-white"></div>
-      <div class="swiper-button-prev"></div>
-      <div class="swiper-button-next"></div>
-    </div>
-  `
-
-  const root = document.querySelector('#slidershow')
-  const mosaicRoot = document.querySelector('#mosaic')
-
   const urlParams = window.location.search.substring(1)
     .split('&')
     .map(item => item.split('='))
@@ -55,46 +33,36 @@
     return decodeImageUrl(imageContainer);
   }
 
-  const getImageDimension = (url) => {
-    return new Promise((resolve) => {
-      const img = new Image()
-      img.src = url
-      img.onload = () => resolve({url, height: img.naturalHeight, width: img.naturalWidth})
-      img.onerror = () => resolve({url: false})
-    })
-  }
-
-  const fetchImage = (url) => {
+  const fetchPage = (url) => {
     return fetch(url)
       .then(res => res.text())
       .then(bodyText => getImageUrl(bodyText))
-      .then(imgUrl => getImageDimension(imgUrl));
   }
 
   const cleanUrls = (urls) => {
     return [...new Set(urls.map(src => src.slice(0, src.indexOf("&set"))).filter(src => !!src))];
   }
 
-  const fetchImages = (urls) => {
+  const fetchPages = (pageUrls) => {
     let loadCount = 0
-    const cleanedUrl = cleanUrls(urls)
+    const cleanedUrl = cleanUrls(pageUrls)
 
-    const promises = cleanedUrl.map(url => {
+    const promises = cleanedUrl.map(pageUrl => {
       return new Promise((resolve) => {
-        const next = (error, images) => {
+        const next = (error, imgUrl) => {
           loadCount++
           $('#slidershow').html(`Loading ${loadCount} of ${cleanedUrl.length} image(s)`)
           if (error) {
-            $('#slidershow').html(`Invalid URL ${url}`)
+            $('#slidershow').html(`Invalid URL ${pageUrl}`)
             resolve()
           } else {
-            resolve(images)
+            resolve(imgUrl)
           }
         }
 
         try {
-          fetchImage(url)
-            .then(images => next(null, images))
+          fetchPage(pageUrl)
+            .then(imgUrl => next(null, imgUrl))
             .catch(e => next(true));
         } catch (e) {
           next(true)
@@ -102,55 +70,6 @@
       })
     })
     return Promise.all(promises)
-  }
-
-  const initSwiper = () => new Swiper('.swiper-container', {
-    speed: 1300,
-    keyboard: {
-      enabled: true
-    },
-    autoplay: {
-      delay: 3000,
-      disableOnInteraction: false
-    },
-    mousewheel: {
-      invert: true
-    },
-    grabCursor: true,
-    centeredSlides: true,
-    slidesPerView: 1,
-    effect: 'fade',
-    fadeEffect: {
-      crossFade: true
-    },
-    pagination: {
-      el: '.swiper-pagination',
-      dynamicBullets: true,
-      dynamicMainBullets: 2
-    },
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev',
-      hideOnClick: true
-    }
-  })
-
-  const initMosaic = () => $('#mosaic').Mosaic({
-    innerGap: 10,
-    outerMargin: 10,
-    refitOnResizeDelay: 100
-  })
-
-  const initViewSwitcher = () => {
-    $('#viewSwitch').click(() => {
-      root.classList.toggle('hide')
-      mosaicRoot.classList.toggle('hide')
-
-      if (!mosaicRoot.classList.contains('hide')) {
-        initMosaic()
-        document.documentElement.requestFullscreen()
-      }
-    })
   }
 
   const playMusic = () => {
@@ -167,21 +86,20 @@
   if (imageSrc) {
     const sources = imageSrc.split('___')
     $('#slidershow').html(`Loading ${sources.length} image(s) ...`)
-    fetchImages(sources)
-      .then(images => images.filter(image => image.url))
-      .then(images => {
-        return {
-          mosaic: generateMosaicImage(images),
-          swiper: generateSwiperContainer(images.map(generateSlide))
-        }
+
+    fetchPages(sources)
+      .then(images => images.filter(image => image && image.startsWith('https://')))
+      .then(images => images.map(image => ({image})))
+      .then(dataSource => {
+        Galleria.loadTheme('./galleria.twelve.js');
+        Galleria.run('.galleria', {
+          dataSource: dataSource,
+          autoplay: true,
+          imageCrop: 'height',
+          fullscreenTransition: 'fade',
+          dummy: '../img/icon.png'
+        });
       })
-      .then(container => {
-        $('#slidershow').html(container.swiper)
-        $('#mosaic').html(container.mosaic)
-      })
-      .then(initSwiper)
       .then(playMusic)
-      .then(initViewSwitcher)
-      .then(initMosaic)
   }
 })()
