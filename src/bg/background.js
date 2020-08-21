@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener((data, sender, sendResponse) => {
 
 chrome.tabs.onActivated.addListener(({tabId, windowId} = {}) => {
   chrome.tabs.query({windowId, 'active': true, 'lastFocusedWindow': true}, ([tab]) => {
-    const isFBtab = tab.url.indexOf('https://www.facebook.com') === 0
+    const isFBtab = tab && tab.url && tab.url.indexOf('https://www.facebook.com') === 0
 
     if (isFBtab) {
       chrome.tabs.sendMessage(tabId, {updateBadgeTextRequest: true})
