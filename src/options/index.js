@@ -12,29 +12,20 @@
 
   const imageSrc = urlParams.src || urlParams.LZSsrc
 
-  const decodeImageUrl = (bodyText) => {
-    bodyText = bodyText.slice(bodyText.indexOf("scaledImageFitWidth img\" src=\"") + 30);
-    bodyText = bodyText.slice(0, bodyText.indexOf('"'));
-    bodyText = bodyText.split("&amp;").join("&");
-    return bodyText;
-  }
-
   const getImageUrl = (bodyText) => {
-    let hyperfeedStoryId = bodyText.slice(bodyText.indexOf('<script>bigPipe.beforePageletArrive("hyperfeed_story_id_') + 37);
-    hyperfeedStoryId = hyperfeedStoryId.slice(0, hyperfeedStoryId.indexOf('")</script>'));
-
-    const selector = `{${hyperfeedStoryId}:{container_id:"`;
-    let containerID = bodyText.slice(bodyText.indexOf(selector) + selector.length);
-    containerID = containerID.slice(0, containerID.indexOf(`"}}`));
-
-    let imageContainer = bodyText.slice(bodyText.indexOf(`<code id="${containerID}"><!--`));
-    imageContainer = imageContainer.slice(0, imageContainer.indexOf(`--></code>`));
-
-    return decodeImageUrl(imageContainer);
+    const left = '<link rel="preload" href="';
+    const right = '" as="image" data-preloader="adp_CometPhotoRootQueryRelayPreloader_';
+    let imgUrl = bodyText.slice(0, bodyText.indexOf(right));
+    imgUrl = imgUrl.slice(imgUrl.lastIndexOf(left) + left.length).replace(/&amp;/gi, "&");
+    return imgUrl;
   }
 
   const fetchPage = (url) => {
-    return fetch(url)
+    return fetch(url, {
+      headers: {
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+      }
+    })
       .then(res => res.text())
       .then(bodyText => getImageUrl(bodyText))
   }
